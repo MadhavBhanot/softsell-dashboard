@@ -95,8 +95,8 @@ const Testimonials = () => {
       
       <div className="container mx-auto px-4 relative z-10">
         <div className={`text-center mb-16 transition-opacity duration-700 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-theme">What Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">Clients</span> Say</h2>
-          <p className="text-theme-secondary max-w-2xl mx-auto text-lg">
+          <h2 className={`text-4xl md:text-5xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>What Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-blue-500">Clients</span> Say</h2>
+          <p className={`max-w-2xl mx-auto text-lg ${isDark ? 'text-gray-200' : 'text-gray-600'}`}>
             We've helped hundreds of businesses and individuals save money on their software needs. Here's what they have to say about our service.
           </p>
         </div>
