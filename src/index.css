@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark theme colors (default) */
+  --bg-main: #12082e;
+  --bg-surface: #1a123a;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --border-color: rgba(124, 58, 237, 0.2);
+  --accent-purple: #9333ea;
+  --accent-indigo: #4f46e5;
+  --accent-blue: #3b82f6;
+  --hero-bg-from: #12082e;
+  --hero-bg-to: #240f54;
+}
+
+/* Light theme colors */
+.light {
+  --bg-main: #f1f5f9;
+  --bg-surface: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --border-color: rgba(99, 102, 241, 0.2);
+  --accent-purple: #8b5cf6;
+  --accent-indigo: #4f46e5;
+  --accent-blue: #3b82f6;
+  --hero-bg-from: #eef2ff;
+  --hero-bg-to: #e0e7ff;
+}
+
+/* Base styles */
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-theme text-theme;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+  @apply text-indigo-500 hover:text-indigo-600 transition-colors;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold;
+}
+
+button {
+  @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50;
+}
+
+/* Utility theme classes */
+.bg-theme {
+  background-color: var(--bg-main);
+}
+
+.bg-theme-surface {
+  background-color: var(--bg-surface);
+}
+
+.text-theme {
+  color: var(--text-primary);
+}
+
+.text-theme-secondary {
+  color: var(--text-secondary);
+}
+
+.border-theme {
+  border-color: var(--border-color);
+}
+
+/* Responsive media query for dark mode preference */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --bg-main: #12082e;
+    --bg-surface: #1a123a;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --border-color: rgba(124, 58, 237, 0.2);
+    --hero-bg-from: #12082e;
+    --hero-bg-to: #240f54;
+  }
+}
+
+/* Custom card styles */
+.card {
+  @apply bg-theme-surface border border-theme rounded-xl p-6 shadow-lg;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-purple-500/20 transform hover:-translate-y-1;
+}
+
+.btn-secondary {
+  @apply bg-theme-surface text-theme border border-theme py-2 px-6 rounded-full transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1;
+}
+
+/* Animations */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-slow-reverse {
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}

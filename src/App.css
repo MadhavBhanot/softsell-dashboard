@@ -1,0 +1,284 @@
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 
+    'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", 
+    "Courier New", monospace;
+  
+  /* Light theme */
+  --color-bg-light: #f8faff;
+  --color-text-light: #1f2937;
+  --color-text-secondary-light: #4b5563;
+  --color-accent-light: #4f46e5;
+  
+  /* Dark theme */
+  --color-bg-dark: #12082e;
+  --color-text-dark: #f9fafb;
+  --color-text-secondary-dark: #d1d5db;
+  --color-accent-dark: #a78bfa;
+}
+
+/* Global styles */
+html {
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  line-height: 1.5;
+  font-size: 16px;
+  font-weight: 400;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: var(--color-bg-light);
+  color: var(--color-text-light);
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Dark mode */
+body.dark-mode {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-dark);
+}
+
+/* Theme specific styles */
+.text-theme {
+  color: var(--color-text-light);
+}
+
+.dark-mode .text-theme {
+  color: var(--color-text-dark);
+}
+
+.text-theme-secondary {
+  color: var(--color-text-secondary-light);
+}
+
+.dark-mode .text-theme-secondary {
+  color: var(--color-text-secondary-dark);
+}
+
+/* Layout */
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Floating particles */
+.particle-light {
+  position: absolute;
+  background-color: rgba(79, 70, 229, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
+  animation-name: float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.particle-dark {
+  position: absolute;
+  background-color: rgba(124, 58, 237, 0.2);
+  border-radius: 50%;
+  pointer-events: none;
+  animation-name: float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-10px) translateX(10px);
+  }
+  50% {
+    transform: translateY(0) translateX(20px);
+  }
+  75% {
+    transform: translateY(10px) translateX(10px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@keyframes float-slow {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-15px) translateX(15px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@keyframes float-slow-reverse {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(15px) translateX(-15px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 15s ease-in-out infinite;
+}
+
+.animate-float-slow-reverse {
+  animation: float-slow-reverse 20s ease-in-out infinite;
+}
+
+/* Loading screen */
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-dark);
+  color: white;
+  font-size: 1.25rem;
+  z-index: 100;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 2.25rem !important;
+  }
+  
+  h2 {
+    font-size: 1.875rem !important;
+  }
+  
+  h3 {
+    font-size: 1.5rem !important;
+  }
+  
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  /* Reduce animations on mobile */
+  .animate-float,
+  .animate-float-slow,
+  .animate-float-slow-reverse {
+    animation-duration: 30s;
+  }
+  
+  /* Reduce blur effect on mobile */
+  .blur-3xl {
+    --tw-blur: blur(24px);
+    filter: var(--tw-blur);
+  }
+  
+  /* Add extra bottom padding to account for chat button */
+  footer {
+    padding-bottom: 5rem;
+  }
+}
+
+/* Utility classes */
+.font-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #a855f7, #3b82f6);
+}
+
+/* Better readability for gradient text */
+.font-gradient-enhanced {
+  text-shadow: 0 0 1px rgba(0,0,0,0.1);
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-accent-light);
+  outline-offset: 2px;
+}
+
+.dark-mode :focus-visible {
+  outline-color: var(--color-accent-dark);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #7c3aed, #3b82f6);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6d28d9, #2563eb);
+}
+
+/* Theme classes */
+.dark-theme {
+  --bg-primary: #12082e;
+  --bg-secondary: #1a123a;
+  --text-primary: #ffffff;
+  --text-secondary: #a8b3cf;
+}
+
+.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+}
