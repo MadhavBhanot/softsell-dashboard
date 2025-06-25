@@ -27,30 +27,6 @@ const Pricing = () => {
     };
   }, []);
   
-  // Mouse position for interactive gradient - only on desktop
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  
-  // Smoothed mouse values with better damping for smoother movement
-  const smoothMouseX = useSpring(mouseX, { damping: 50, stiffness: 90 });
-  const smoothMouseY = useSpring(mouseY, { damping: 50, stiffness: 90 });
-  
-  // Animation control values - reduced for better performance, especially on mobile
-  const blobPositions = Array(isMobile ? 2 : 4).fill(0).map(() => ({
-    x: useMotionValue(Math.random() * 100 - 50),
-    y: useMotionValue(Math.random() * 100 - 50),
-    scale: useMotionValue(0.8 + Math.random() * 0.4),
-    rotation: useMotionValue(Math.random() * 360),
-  }));
-  
-  // Trail effect values - reduced number and optimized for smoothness
-  const trailPositions = Array(isMobile ? 0 : 6).fill(0).map(() => ({
-    x: useMotionValue(0),
-    y: useMotionValue(0),
-    opacity: useMotionValue(0),
-    scale: useMotionValue(0.1),
-  }));
-  
   // Handle intersection observer to trigger animation when section is visible
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -73,144 +49,8 @@ const Pricing = () => {
     };
   }, []);
   
-  // Add/remove mouse movement listener with throttling for better performance
-  useEffect(() => {
-    // Skip on mobile for better performance
-    if (isMobile) return;
-    
-    let lastUpdate = 0;
-    const throttleAmount = 20; // ms - higher = smoother but less responsive
-    
-    const handleMouseMove = (e) => {
-      // Calculate mouse position relative to viewport center
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-      const centerX = windowWidth / 2;
-      const centerY = windowHeight / 2;
-      
-      // Get normalized position (-1 to 1 range)
-      const normalizedX = (e.clientX - centerX) / centerX;
-      const normalizedY = (e.clientY - centerY) / centerY;
-      
-      // Update mouse position with more gentle effect
-      mouseX.set(normalizedX * 30);
-      mouseY.set(normalizedY * 30);
-    };
-    
-    const throttledMouseMove = (e) => {
-      const now = Date.now();
-      if (now - lastUpdate > throttleAmount) {
-        handleMouseMove(e);
-        lastUpdate = now;
-      }
-    };
-    
-    window.addEventListener('mousemove', throttledMouseMove);
-    
-    return () => {
-      window.removeEventListener('mousemove', throttledMouseMove);
-    };
-  }, [isMobile, mouseX, mouseY]);
-  
-  // Animate blobs when visible - with improved timing for smoothness
-  useEffect(() => {
-    if (isVisible && blobPositions.length > 0) {
-      // Slower animation on mobile
-      const speedMultiplier = isMobile ? 1.5 : 1;
-      
-      // Animate each blob independently but with smoother transitions
-      blobPositions.forEach((blob, index) => {
-        const speed = (20 + (index * 5)) * speedMultiplier; // Slower, more deliberate movement
-        
-        // More gentle, predictable patterns for smoother appearance
-        animate(blob.x, [
-          (index % 2 === 0 ? 30 : -30),
-          (index % 2 === 0 ? -20 : 20),
-          (index % 2 === 0 ? 10 : -10),
-          (index % 2 === 0 ? -30 : 30),
-        ], {
-          duration: speed,
-          repeat: Infinity,
-          repeatType: "mirror",
-          ease: [0.22, 0.03, 0.26, 1] // Custom cubic bezier for smoother motion
-        });
-        
-        animate(blob.y, [
-          (index % 2 === 0 ? -25 : 25),
-          (index % 2 === 0 ? 15 : -15),
-          (index % 2 === 0 ? -15 : 15),
-          (index % 2 === 0 ? 25 : -25),
-        ], {
-          duration: speed + 10,
-          repeat: Infinity,
-          repeatType: "mirror",
-          ease: [0.22, 0.03, 0.26, 1]
-        });
-        
-        // More gradual scale changes
-        animate(blob.scale, [
-          0.9,
-          1.05,
-          0.95,
-          1.1,
-          0.9
-        ], {
-          duration: speed + 15,
-          repeat: Infinity,
-          repeatType: "mirror",
-          ease: "easeInOut"
-        });
-        
-        // Very slow rotation for subtle effect
-        animate(blob.rotation, [
-          0,
-          index % 2 === 0 ? 15 : -15,
-          0,
-          index % 2 === 0 ? -15 : 15,
-          0
-        ], {
-          duration: speed + 30,
-          repeat: Infinity,
-          repeatType: "mirror",
-          ease: "linear"
-        });
-      });
-    }
-  }, [isVisible, blobPositions, isMobile]);
-  
-  // Create animated trail effect - moved to separate useEffect to maintain hook order consistency
-  useEffect(() => {
-    // Skip on mobile for performance
-    if (isMobile || !isVisible || trailPositions.length === 0) return;
-    
-    const trailInterval = setInterval(() => {
-      // Shift all trail positions
-      for (let i = trailPositions.length - 1; i > 0; i--) {
-        const current = trailPositions[i];
-        const prev = trailPositions[i - 1];
-        
-        current.x.set(prev.x.get());
-        current.y.set(prev.y.get());
-        current.opacity.set(Math.max(0, prev.opacity.get() - 0.1));
-        current.scale.set(prev.scale.get() * 0.95);
-      }
-      
-      // Update the first position with current mouse position - more subtle
-      if (trailPositions[0]) {
-        trailPositions[0].x.set(smoothMouseX.get() * 0.3);
-        trailPositions[0].y.set(smoothMouseY.get() * 0.3);
-        trailPositions[0].opacity.set(0.6);
-        trailPositions[0].scale.set(0.3 + Math.random() * 0.2);
-      }
-    }, 100); // Slower update for smoother appearance
-    
-    return () => {
-      clearInterval(trailInterval);
-    };
-  }, [isVisible, isMobile, trailPositions, smoothMouseX, smoothMouseY]);
-  
   // Price calculation based on billing cycle
-  const getPrice = (monthlyPrice, annually = false) => {
+  const getPrice = (monthlyPrice) => {
     if (billingCycle === 'annually') {
       const annualPrice = (monthlyPrice * 10).toFixed(2);
       return { price: annualPrice, period: '/year' };
@@ -240,55 +80,6 @@ const Pricing = () => {
         ease: [0.19, 1, 0.22, 1],
       }
     }
-  };
-  
-  // Simplified fluid shapes component for mobile
-  const FluidShapes = ({ isHovered, className }) => {
-    // Skip rendering complex effects on mobile
-    if (isMobile) {
-      return (
-        <div className={`absolute inset-0 ${className}`}>
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-50">
-            <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full blur-3xl bg-purple-600/20"></div>
-            <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full blur-3xl bg-blue-600/20"></div>
-          </div>
-        </div>
-      );
-    }
-    
-    return (
-      <div className={`absolute inset-0 ${className}`}>
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-          {blobPositions.map((blob, index) => (
-            <motion.div
-              key={index}
-              className={`absolute w-64 h-64 rounded-full mix-blend-lighten filter blur-3xl ${
-                index % 2 === 0 ? 'bg-purple-600/15' : 'bg-blue-600/15'
-              }`}
-              style={{
-                x: blob.x,
-                y: blob.y,
-                scale: blob.scale,
-                rotate: blob.rotation,
-              }}
-            />
-          ))}
-          
-          {!isMobile && trailPositions.map((trail, index) => (
-            <motion.div
-              key={`trail-${index}`}
-              className="absolute w-8 h-8 rounded-full bg-white mix-blend-overlay filter blur-md"
-              style={{
-                x: trail.x,
-                y: trail.y,
-                opacity: trail.opacity,
-                scale: trail.scale,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-    );
   };
   
   // Price cards
@@ -355,7 +146,7 @@ const Pricing = () => {
       }`}
     >
       {/* Optimized background effect */}
-      <FluidShapes className="opacity-70" />
+      <FluidShapes className="opacity-70" isMobile={isMobile} isVisible={isVisible} />
       
       <div className="container mx-auto max-w-7xl relative z-10">
         <div className="text-center mb-12 sm:mb-16">
@@ -408,7 +199,7 @@ const Pricing = () => {
           className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8 mb-12"
         >
           {priceCards.map((card) => {
-            const { price, period } = getPrice(card.monthly, billingCycle === 'annually');
+            const { price, period } = getPrice(card.monthly);
             const isHovered = hoveredCard === card.id;
             
             return (
@@ -526,6 +317,230 @@ const Pricing = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+// Refactored FluidShapes to always call hooks unconditionally
+const FluidShapes = ({ className, isMobile, isVisible }) => {
+  // Always call hooks, even if not used on mobile
+  // Call useMotionValue a fixed number of times, not in a loop
+  // For blobs
+  const blob0 = {
+    x: useMotionValue(Math.random() * 100 - 50),
+    y: useMotionValue(Math.random() * 100 - 50),
+    scale: useMotionValue(0.8 + Math.random() * 0.4),
+    rotation: useMotionValue(Math.random() * 360),
+  };
+  const blob1 = {
+    x: useMotionValue(Math.random() * 100 - 50),
+    y: useMotionValue(Math.random() * 100 - 50),
+    scale: useMotionValue(0.8 + Math.random() * 0.4),
+    rotation: useMotionValue(Math.random() * 360),
+  };
+  const blob2 = {
+    x: useMotionValue(Math.random() * 100 - 50),
+    y: useMotionValue(Math.random() * 100 - 50),
+    scale: useMotionValue(0.8 + Math.random() * 0.4),
+    rotation: useMotionValue(Math.random() * 360),
+  };
+  const blob3 = {
+    x: useMotionValue(Math.random() * 100 - 50),
+    y: useMotionValue(Math.random() * 100 - 50),
+    scale: useMotionValue(0.8 + Math.random() * 0.4),
+    rotation: useMotionValue(Math.random() * 360),
+  };
+  const blobPositions = isMobile ? [blob0, blob1] : [blob0, blob1, blob2, blob3];
+
+  // For trails
+  const trail0 = {
+    x: useMotionValue(0),
+    y: useMotionValue(0),
+    opacity: useMotionValue(0),
+    scale: useMotionValue(0.1),
+  };
+  const trail1 = {
+    x: useMotionValue(0),
+    y: useMotionValue(0),
+    opacity: useMotionValue(0),
+    scale: useMotionValue(0.1),
+  };
+  const trail2 = {
+    x: useMotionValue(0),
+    y: useMotionValue(0),
+    opacity: useMotionValue(0),
+    scale: useMotionValue(0.1),
+  };
+  const trail3 = {
+    x: useMotionValue(0),
+    y: useMotionValue(0),
+    opacity: useMotionValue(0),
+    scale: useMotionValue(0.1),
+  };
+  const trail4 = {
+    x: useMotionValue(0),
+    y: useMotionValue(0),
+    opacity: useMotionValue(0),
+    scale: useMotionValue(0.1),
+  };
+  const trail5 = {
+    x: useMotionValue(0),
+    y: useMotionValue(0),
+    opacity: useMotionValue(0),
+    scale: useMotionValue(0.1),
+  };
+  const trailPositions = isMobile ? [] : [trail0, trail1, trail2, trail3, trail4, trail5];
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothMouseX = useSpring(mouseX, { damping: 50, stiffness: 90 });
+  const smoothMouseY = useSpring(mouseY, { damping: 50, stiffness: 90 });
+
+  // Add/remove mouse movement listener with throttling for better performance
+  useEffect(() => {
+    if (isMobile) return;
+    let lastUpdate = 0;
+    const throttleAmount = 20;
+    const handleMouseMove = (e) => {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const centerX = windowWidth / 2;
+      const centerY = windowHeight / 2;
+      const normalizedX = (e.clientX - centerX) / centerX;
+      const normalizedY = (e.clientY - centerY) / centerY;
+      mouseX.set(normalizedX * 30);
+      mouseY.set(normalizedY * 30);
+    };
+    const throttledMouseMove = (e) => {
+      const now = Date.now();
+      if (now - lastUpdate > throttleAmount) {
+        handleMouseMove(e);
+        lastUpdate = now;
+      }
+    };
+    window.addEventListener('mousemove', throttledMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', throttledMouseMove);
+    };
+  }, [isMobile, mouseX, mouseY]);
+
+  // Animate blobs when visible
+  useEffect(() => {
+    if (isVisible && blobPositions.length > 0) {
+      const speedMultiplier = isMobile ? 1.5 : 1;
+      blobPositions.forEach((blob, index) => {
+        const speed = (20 + (index * 5)) * speedMultiplier;
+        animate(blob.x, [
+          (index % 2 === 0 ? 30 : -30),
+          (index % 2 === 0 ? -20 : 20),
+          (index % 2 === 0 ? 10 : -10),
+          (index % 2 === 0 ? -30 : 30),
+        ], {
+          duration: speed,
+          repeat: Infinity,
+          repeatType: "mirror",
+          ease: [0.22, 0.03, 0.26, 1]
+        });
+        animate(blob.y, [
+          (index % 2 === 0 ? -25 : 25),
+          (index % 2 === 0 ? 15 : -15),
+          (index % 2 === 0 ? -15 : 15),
+          (index % 2 === 0 ? 25 : -25),
+        ], {
+          duration: speed + 10,
+          repeat: Infinity,
+          repeatType: "mirror",
+          ease: [0.22, 0.03, 0.26, 1]
+        });
+        animate(blob.scale, [
+          0.9, 1.05, 0.95, 1.1, 0.9
+        ], {
+          duration: speed + 15,
+          repeat: Infinity,
+          repeatType: "mirror",
+          ease: "easeInOut"
+        });
+        animate(blob.rotation, [
+          0,
+          index % 2 === 0 ? 15 : -15,
+          0,
+          index % 2 === 0 ? -15 : 15,
+          0
+        ], {
+          duration: speed + 30,
+          repeat: Infinity,
+          repeatType: "mirror",
+          ease: "linear"
+        });
+      });
+    }
+  }, [isVisible, blobPositions, isMobile]);
+
+  // Create animated trail effect
+  useEffect(() => {
+    if (isMobile || !isVisible || trailPositions.length === 0) return;
+    const trailInterval = setInterval(() => {
+      for (let i = trailPositions.length - 1; i > 0; i--) {
+        const current = trailPositions[i];
+        const prev = trailPositions[i - 1];
+        current.x.set(prev.x.get());
+        current.y.set(prev.y.get());
+        current.opacity.set(Math.max(0, prev.opacity.get() - 0.1));
+        current.scale.set(prev.scale.get() * 0.95);
+      }
+      if (trailPositions[0]) {
+        trailPositions[0].x.set(smoothMouseX.get() * 0.3);
+        trailPositions[0].y.set(smoothMouseY.get() * 0.3);
+        trailPositions[0].opacity.set(0.6);
+        trailPositions[0].scale.set(0.3 + Math.random() * 0.2);
+      }
+    }, 100);
+    return () => {
+      clearInterval(trailInterval);
+    };
+  }, [isVisible, isMobile, trailPositions, smoothMouseX, smoothMouseY]);
+
+  // Render
+  if (isMobile) {
+    return (
+      <div className={`absolute inset-0 ${className}`}>
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-50">
+          <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full blur-3xl bg-purple-600/20"></div>
+          <div className="absolute -bottom-24 -right-24 w-64 h-64 rounded-full blur-3xl bg-blue-600/20"></div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className={`absolute inset-0 ${className}`}>
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+        {blobPositions.map((blob, index) => (
+          <motion.div
+            key={index}
+            className={`absolute w-64 h-64 rounded-full mix-blend-lighten filter blur-3xl ${
+              index % 2 === 0 ? 'bg-purple-600/15' : 'bg-blue-600/15'
+            }`}
+            style={{
+              x: blob.x,
+              y: blob.y,
+              scale: blob.scale,
+              rotate: blob.rotation,
+            }}
+          />
+        ))}
+        {!isMobile && trailPositions.map((trail, index) => (
+          <motion.div
+            key={`trail-${index}`}
+            className="absolute w-8 h-8 rounded-full bg-white mix-blend-overlay filter blur-md"
+            style={{
+              x: trail.x,
+              y: trail.y,
+              opacity: trail.opacity,
+              scale: trail.scale,
+            }}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
